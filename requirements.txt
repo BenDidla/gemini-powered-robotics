@@ -1,1 +1,6 @@
+openai
+speechrecognition
+pyttsx3
+gpiozero  # If using Raspberry Pi
+pyserial   # If using Arduino
 
