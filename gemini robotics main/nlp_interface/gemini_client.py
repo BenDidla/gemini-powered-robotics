@@ -1,4 +1,5 @@
 # nlp_interface/gemini_client.py
+
 import os
 import openai
 
@@ -10,12 +11,15 @@ class GeminiClient:
 
         openai.api_key = self.api_key
 
+        # For Gemini, assuming you're using OpenAI's "gpt-4" or Gemini-like model
+        self.client = openai.OpenAI()
+
     def ask_gemini(self, prompt: str) -> str:
         """
-        Send a prompt to Gemini API and return the response.
+        Send a prompt to Gemini (or GPT-4) and return the response.
         """
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are an assistant helping to control a robot."},
@@ -24,9 +28,8 @@ class GeminiClient:
                 temperature=0.5,
                 max_tokens=100
             )
-            return response['choices'][0]['message']['content'].strip()
+            return response.choices[0].message.content.strip()
 
         except Exception as e:
             print(f"[GeminiClient] Error: {e}")
             return "Sorry, I couldn't process that command."
-
