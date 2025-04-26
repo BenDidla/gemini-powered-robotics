@@ -8,6 +8,7 @@ import subprocess
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
+# Try importing needed packages, install if missing
 try:
     import speech_recognition as sr
 except ImportError:
@@ -20,7 +21,7 @@ except ImportError:
     install("openai")
     import openai
 
-# Optional: install pyaudio (for voice)
+# Optional: PyAudio for microphone (might fail sometimes)
 try:
     import pyaudio
 except ImportError:
@@ -31,6 +32,7 @@ except ImportError:
         print("⚠️  PyAudio installation failed. Voice input might not work.")
         sr = None
 
+# Import project modules
 from nlp_interface.gemini_client import GeminiClient
 from nlp_interface.command_parser import CommandParser
 from robot_controller.task_executor import TaskExecutor
@@ -64,27 +66,28 @@ def get_text_input():
 def main():
     print("\n🤖 Robot System Booting Up...")
 
+    # Initialize modules
     gemini = GeminiClient()
     parser = CommandParser()
     executor = TaskExecutor()
 
     try:
         while True:
-            # Step 1: Get input (voice first if possible)
+            # Step 1: Get input
             prompt = None
             if sr is not None:
                 print("\n[MODE] Voice input enabled 🎙️")
                 prompt = get_voice_input()
 
             if prompt is None:
-                print("\n[MODE] Using text input 🖋️")
+                print("\n[MODE] Using text input 🖊️")
                 prompt = get_text_input()
 
             if prompt.lower() == 'exit':
                 print("\n👋 Exiting robot control...")
                 break
 
-            # Step 2: Send to Gemini
+            # Step 2: Ask Gemini/OpenAI
             gemini_response = gemini.ask_gemini(prompt)
             print(f"\n📜 Gemini Response: {gemini_response}")
 
@@ -92,7 +95,7 @@ def main():
             command = parser.parse(gemini_response)
             print(f"\n🔍 Parsed Command: {command}")
 
-            # Step 4: Execute command
+            # Step 4: Execute robot movement
             executor.execute(command)
 
     except KeyboardInterrupt:
